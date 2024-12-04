@@ -101,8 +101,8 @@ public class StanderedGameScreen {
 
     private TextField createGuessBox() {
         TextField textField = new TextField();
-        textField.setMaxWidth(50);
-        textField.setMaxHeight(50);
+        textField.setMaxWidth(70);
+        textField.setMaxHeight(80);
         textField.setAlignment(Pos.CENTER);
         textField.setFont(Font.font(24)); // Increased font size
         textField.setStyle("-fx-background-color: white; -fx-border-color: black;");
