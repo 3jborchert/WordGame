@@ -94,7 +94,7 @@ public class ScreenManager {
 
     private Scene createHomeScreen() {
         HomeScreen homeScreen = new HomeScreen(this);
-        return new Scene(homeScreen.getRoot(), 1001, 800);
+        return new Scene(homeScreen.getRoot(), 1000, 800);
     }
 
     private Scene createSettingsScreen() {
