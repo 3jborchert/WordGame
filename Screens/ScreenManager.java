@@ -89,7 +89,7 @@ public class ScreenManager {
 
     private Scene createScreenTwo() {
         ScreenTwo screenTwo = new ScreenTwo(this);
-        return new Scene(screenTwo.getRoot(), 401, 300);
+        return new Scene(screenTwo.getRoot(), 400, 300);
     }
 
     private Scene createHomeScreen() {

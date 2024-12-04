@@ -185,12 +185,13 @@ public class StanderedGameScreen {
         // Create the symbol (image) to add to the box
         ImageView symbolImage = null;
         try {
-            // Adjust path for resources in the src/Resources folder
-            String imagePath = "Resources/Symbols/" + symbol + ".png"; // Correct path
-            InputStream imageStream = getClass().getResourceAsStream(imagePath);
-            if (imageStream != null) {
-                // Create an Image from the InputStream
-                Image image = new Image(imageStream);
+            // Adjust path to point to src/Resources/Symbols/
+            String imagePath = "Resources/Symbols/" + symbol + ".png"; // Relative to the src dir
+            File imageFile = new File(imagePath);
+
+            if (imageFile.exists()) {
+                // Load image using the file system path
+                Image image = new Image(imageFile.toURI().toString());
                 symbolImage = new ImageView(image);
                 symbolImage.setFitWidth(25); // Larger image size
                 symbolImage.setFitHeight(25);
