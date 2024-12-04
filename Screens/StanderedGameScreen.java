@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class StanderedGameScreen {
+
     private VBox root;
     private ScreenManager screenManager;
     private GridPane grid;
@@ -33,7 +34,7 @@ public class StanderedGameScreen {
         grid = new GridPane();
         submitButton = new Button("Submit");
         currentGuessBoxes = new ArrayList<>();
-        currentAttempt = 0;
+        currentAttempt = 0; // Start from attempt 0
 
         loadPossibleWords();
         initializeGame();
@@ -102,20 +103,19 @@ public class StanderedGameScreen {
     }
 
     private void handleSubmitGuess() {
-        // Check if we have reached max attempts first
-        if (currentAttempt >= 6) {
-            System.out.println("Game Over. The correct word was: " + correctWord);
-            return;
-        }
+        // Print the correct word to the terminal for debugging
+        System.out.println("Correct word: " + correctWord);
 
-        // Get the current guess from the text fields in the current attempt row
+        // Get the current guess from the text fields
         StringBuilder guess = new StringBuilder();
-        List<TextField> guessRow = currentGuessBoxes.get(currentAttempt);
-        for (TextField box : guessRow) {
+        for (TextField box : currentGuessBoxes.get(currentAttempt)) {
             guess.append(box.getText().toLowerCase());
         }
 
-        // Ensure the guess length is valid
+        // Print the current guess to the terminal
+        System.out.println("Current guess: " + guess);
+
+        // Check if the guess is valid (same length as the correct word)
         if (guess.length() != wordLength) {
             System.out.println("Invalid guess length.");
             return;
@@ -128,23 +128,25 @@ public class StanderedGameScreen {
             System.out.println("You win!");
         } else {
             updateGuessBoxes(false);
-            currentAttempt++;
+            currentAttempt++; // Increment the attempt after a guess
 
-            // Add a new row if there are more attempts left
-            if (currentAttempt < 6) {
-                List<TextField> nextRow = new ArrayList<>();
-                for (int i = 0; i < wordLength; i++) {
-                    nextRow.add(createGuessBox());
-                }
-                currentGuessBoxes.add(nextRow);
-                updateGridLayout();
+            // Check if we have reached max attempts
+            if (currentAttempt >= 6) {
+                System.out.println("Game Over. The correct word was: " + correctWord);
+            } else {
+                currentGuessBoxes.add(new ArrayList<>()); // Prepare for the next row of guesses
             }
         }
     }
 
     private void updateGuessBoxes(boolean isCorrect) {
-        // Only update the current row for the active attempt
-        List<TextField> row = currentGuessBoxes.get(currentAttempt - 1); // Current row for the current attempt
+        // Ensure we're working with a valid attempt index
+        if (currentAttempt <= 0) {
+            System.out.println("Invalid attempt index.");
+            return;
+        }
+
+        List<TextField> row = currentGuessBoxes.get(currentAttempt); // currentAttempt -1 Adjust index to match attempts
         for (int i = 0; i < row.size(); i++) {
             TextField box = row.get(i);
             char guessedChar = box.getText().charAt(0);
@@ -172,26 +174,28 @@ public class StanderedGameScreen {
         StackPane pane = new StackPane();
         pane.setAlignment(Pos.TOP_RIGHT); // Align the symbol to the top right corner
 
-        // Corrected path: Resources is not included in the path (it’s in the classpath)
-        String imagePath = "/Symbols/" + symbol + ".png";
+        // Create the symbol (image) to add to the box
         ImageView symbolImage = null;
-
-        // Try loading the symbol image
         try {
-            // Create an Image from the InputStream
+            // Adjust path for resources in the src/Resources folder
+            String imagePath = "Resources/Symbols/" + symbol + ".png"; // Corrected path
             InputStream imageStream = getClass().getResourceAsStream(imagePath);
             if (imageStream != null) {
+                // Create an Image from the InputStream
                 Image image = new Image(imageStream);
                 symbolImage = new ImageView(image);
                 symbolImage.setFitWidth(15);
                 symbolImage.setFitHeight(15);
-                pane.getChildren().add(symbolImage); // Add the image to the pane
             } else {
                 System.out.println("Image not found: " + imagePath);
             }
         } catch (Exception e) {
-            System.out.println("Error loading image for symbol: " + symbol + " (" + imagePath + ")");
-            e.printStackTrace();
+            System.out.println("Error loading symbol: " + e.getMessage());
+        }
+
+        // Add the symbol to the pane
+        if (symbolImage != null) {
+            pane.getChildren().add(symbolImage);
         }
 
         // Create a new StackPane that wraps the TextField and the symbol
@@ -200,17 +204,6 @@ public class StanderedGameScreen {
 
         // Replace the original TextField with the new StackPane
         grid.add(textFieldWithSymbol, GridPane.getColumnIndex(box), GridPane.getRowIndex(box));
-    }
-
-    private void updateGridLayout() {
-        grid.getChildren().clear();
-        for (int row = 0; row < currentGuessBoxes.size(); row++) {
-            List<TextField> guessRow = currentGuessBoxes.get(row);
-            for (int col = 0; col < guessRow.size(); col++) {
-                TextField box = guessRow.get(col);
-                grid.add(box, col, row);
-            }
-        }
     }
 
     public VBox getRoot() {
