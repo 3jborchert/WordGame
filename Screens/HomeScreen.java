@@ -26,8 +26,18 @@ public class HomeScreen {
         settingsButton = new Button("Settings");
         gameTitle = new Label("Word Game");
 
+        playButton.setStyle("-fx-background-color: grey; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2px;");
+        settingsButton.setStyle("-fx-background-color: grey; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2px;");
+        
+        playButton.setMinSize(120, 40); // Size the button properly
+        settingsButton.setMinSize(120, 40);
+
+        // Set button actions
         playButton.setOnAction(e -> screenManager.showScreen("StanderedGameScreen"));
         settingsButton.setOnAction(e -> screenManager.showScreen("SettingsScreen"));
+
+        // Set game title style
+        gameTitle.setStyle("-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: black;");
 
         root.getChildren().addAll(gameTitle,playButton,settingsButton);
         root.setAlignment(Pos.CENTER);

@@ -10,6 +10,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ColorSchemes.ColorScheme;
 import FontSchemes.FontScheme;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 
 public class SettingsScreen {
 
@@ -32,6 +34,9 @@ public class SettingsScreen {
         fontSchemeCombo = new ComboBox<>();
         fontSchemeCombo.getItems().addAll("Default", "Large", "Small");  // Use strings for font schemes
         fontSchemeCombo.setValue("Default");  // Default selection
+        
+        colorSchemeCombo.setStyle("-fx-font-size: 14px; -fx-background-color: white; -fx-border-color: black;");
+        fontSchemeCombo.setStyle("-fx-font-size: 14px; -fx-background-color: white; -fx-border-color: black;");
 
         // Create Apply button to apply selected settings
         applyButton = new Button("Apply Settings");
@@ -51,8 +56,13 @@ public class SettingsScreen {
             screenManager.showScreen("HomeScreen");
         });
 
+        applyButton.setStyle("-fx-background-color: grey; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2px;");
+        applyButton.setMinSize(120, 40);
+
         // Add all components to root
         root.getChildren().addAll(colorSchemeCombo, fontSchemeCombo, applyButton);
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(20));
     }
 
     public VBox getRoot() {
