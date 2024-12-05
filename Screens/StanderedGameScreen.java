@@ -8,12 +8,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class StanderedGameScreen {
 
@@ -21,46 +19,57 @@ public class StanderedGameScreen {
     private ScreenManager screenManager;
     private GridPane grid;
     private Button submitButton;
-    private Button playAgainButton;
-    private Button homeButton; // Home button
+    private Button homeButton;
+    private Button replayButton;
     private List<List<TextField>> currentGuessBoxes;
     private int currentAttempt;
     private List<String> possibleWords;
     private String correctWord;
     private int wordLength;
-    private boolean gameWon;
+    private Text gameOverText;
 
     public StanderedGameScreen(ScreenManager screenManager) {
         this.screenManager = screenManager;
         root = new VBox(20);
         grid = new GridPane();
         submitButton = new Button("Submit");
-        playAgainButton = new Button("Play Again");
-        homeButton = new Button("Home"); // Initialize Home button
+        homeButton = new Button("Home");
+        replayButton = new Button("Play Again");
         currentGuessBoxes = new ArrayList<>();
-        currentAttempt = 0; // Start from attempt 0
-        gameWon = false;
+        currentAttempt = 0;
 
+        // Load words and initialize game
         loadPossibleWords();
         initializeGame();
 
-        submitButton.setOnAction(e -> handleSubmitGuess());
-        playAgainButton.setOnAction(e -> restartGame());
-        homeButton.setOnAction(e -> goToHomeScreen()); // Home button action
+        // Initialize the "Game Over" Text
+        gameOverText = new Text();
+        gameOverText.setFont(Font.font(18));
+        gameOverText.setFill(Color.RED);
 
-        // Layout adjustments
-        HBox topBar = new HBox(10, homeButton); // Add home button to the top bar
-        topBar.setAlignment(Pos.TOP_LEFT);
+        // Set up the Home button action (top-left corner)
+        homeButton.setOnAction(e -> goHome());
+        homeButton.setStyle("-fx-font-size: 14px; -fx-background-color: grey; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2px;");
+        homeButton.setMinSize(100, 40); // Size the button properly
+
+        // Set up the Replay button action
+        replayButton.setOnAction(e -> startNewGame());
+        replayButton.setVisible(false);  // Initially hidden
+        replayButton.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 14px; -fx-border-radius: 10px;");
+        replayButton.setMinSize(120, 40); // Size the button properly
+
+        // Set up Submit button action
+        submitButton.setOnAction(e -> handleSubmitGuess());
+        submitButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-border-radius: 10px;");
+        submitButton.setMinSize(120, 40); // Size the button properly
 
         root.setAlignment(Pos.CENTER);
-        root.getChildren().addAll(topBar, grid, submitButton, playAgainButton);
-        playAgainButton.setVisible(false); // Hide play again button initially
-        homeButton.setVisible(true); // Make sure the Home button is visible
+        // Create an HBox for top layout
+        HBox topLayout = new HBox(20, homeButton);
+        topLayout.setAlignment(Pos.TOP_LEFT);
 
-        // Center the game grid
-        grid.setAlignment(Pos.CENTER);
-        grid.setVgap(10);
-        grid.setHgap(10);
+        // Add buttons and grid to the root layout
+        root.getChildren().addAll(topLayout, gameOverText, grid, submitButton, replayButton);
     }
 
     private void loadPossibleWords() {
@@ -85,7 +94,6 @@ public class StanderedGameScreen {
         grid.getChildren().clear();
         currentGuessBoxes.clear();
         currentAttempt = 0;
-        gameWon = false;
 
         // Create input boxes based on the word length
         for (int row = 0; row < 6; row++) {
@@ -97,36 +105,59 @@ public class StanderedGameScreen {
             }
             currentGuessBoxes.add(rowBoxes);
         }
+
+        // Arrange grid layout: Center the grid in the VBox
+        grid.setVgap(10);
+        grid.setHgap(10);
+        grid.setAlignment(Pos.CENTER);  // Ensure the grid is centered within the VBox
     }
 
     private TextField createGuessBox() {
         TextField textField = new TextField();
-        textField.setMaxWidth(70);
+        textField.setMaxWidth(70);  // Adjust text box width
         textField.setMaxHeight(80);
         textField.setAlignment(Pos.CENTER);
-        textField.setFont(Font.font(24)); // Increased font size
+        textField.setFont(Font.font(30));  // Larger font for better visibility
         textField.setStyle("-fx-background-color: white; -fx-border-color: black;");
 
+        // Add listener to ensure only one letter is entered and auto-move to the next box
         textField.textProperty().addListener((obs, oldText, newText) -> {
-            // Ensure only a single character is entered
             if (newText.length() > 1) {
                 textField.setText(newText.substring(0, 1));
+            }
+            // Automatically move to the next box if a key is entered
+            if (newText.length() == 1) {
+                moveToNextBox(textField);
             }
         });
 
         return textField;
     }
 
+    private void moveToNextBox(TextField currentBox) {
+        // Get the position of the current box
+        int rowIndex = GridPane.getRowIndex(currentBox);
+        int colIndex = GridPane.getColumnIndex(currentBox);
+
+        // Move to the next box in the row, if available
+        if (colIndex < wordLength - 1) {
+            TextField nextBox = currentGuessBoxes.get(rowIndex).get(colIndex + 1);
+            nextBox.requestFocus();  // Focus on the next box
+        }
+    }
+
     private void handleSubmitGuess() {
-        // Prevent submitting after the game is won
-        if (gameWon)
-            return;
+        // Print the correct word to the terminal for debugging
+        System.out.println("Correct word: " + correctWord);
 
         // Get the current guess from the text fields
         StringBuilder guess = new StringBuilder();
         for (TextField box : currentGuessBoxes.get(currentAttempt)) {
             guess.append(box.getText().toLowerCase());
         }
+
+        // Print the current guess to the terminal
+        System.out.println("Current guess: " + guess);
 
         // Check if the guess is valid (same length as the correct word)
         if (guess.length() != wordLength) {
@@ -138,9 +169,9 @@ public class StanderedGameScreen {
         String guessStr = guess.toString();
         if (guessStr.equals(correctWord)) {
             updateGuessBoxes(true);
-            gameWon = true;
             System.out.println("You win!");
-            playAgainButton.setVisible(true); // Show play again button
+            disableSubmissions();  // Disable further submissions after win
+            showGameOver("You Win! The correct word was: " + correctWord);
         } else {
             updateGuessBoxes(false);
             currentAttempt++; // Increment the attempt after a guess
@@ -148,13 +179,20 @@ public class StanderedGameScreen {
             // Check if we have reached max attempts
             if (currentAttempt >= 6) {
                 System.out.println("Game Over. The correct word was: " + correctWord);
-                playAgainButton.setVisible(true); // Show play again button
+                showGameOver("Game Over! The correct word was: " + correctWord);
+            } else {
+                currentGuessBoxes.add(new ArrayList<>()); // Prepare for the next row of guesses
             }
         }
     }
 
     private void updateGuessBoxes(boolean isCorrect) {
-        List<TextField> row = currentGuessBoxes.get(currentAttempt); // Adjusted for 0-based index
+        // Ensure we're working with a valid attempt index
+        if (currentAttempt < 0 || currentAttempt >= currentGuessBoxes.size()) {
+            return;
+        }
+
+        List<TextField> row = currentGuessBoxes.get(currentAttempt); 
         for (int i = 0; i < row.size(); i++) {
             TextField box = row.get(i);
             char guessedChar = box.getText().charAt(0);
@@ -182,19 +220,15 @@ public class StanderedGameScreen {
         StackPane pane = new StackPane();
         pane.setAlignment(Pos.TOP_RIGHT); // Align the symbol to the top-right corner
 
-        // Create the symbol (image) to add to the box
         ImageView symbolImage = null;
         try {
-            // Adjust path to point to src/Resources/Symbols/
-            String imagePath = "Resources/Symbols/" + symbol + ".png"; // Relative to the src dir
-            File imageFile = new File(imagePath);
-
-            if (imageFile.exists()) {
-                // Load image using the file system path
-                Image image = new Image(imageFile.toURI().toString());
+            String imagePath = "Resources/Symbols/" + symbol + ".png"; // Corrected path
+            File file = new File(imagePath);
+            if (file.exists()) {
+                Image image = new Image(file.toURI().toString());
                 symbolImage = new ImageView(image);
-                symbolImage.setFitWidth(25); // Larger image size
-                symbolImage.setFitHeight(25);
+                symbolImage.setFitWidth(20);
+                symbolImage.setFitHeight(20);
             } else {
                 System.out.println("Image not found: " + imagePath);
             }
@@ -202,30 +236,39 @@ public class StanderedGameScreen {
             System.out.println("Error loading symbol: " + e.getMessage());
         }
 
-        // Add the symbol to the pane
         if (symbolImage != null) {
             pane.getChildren().add(symbolImage);
         }
 
-        // Create a new StackPane that wraps the TextField and the symbol
         StackPane textFieldWithSymbol = new StackPane();
         textFieldWithSymbol.getChildren().addAll(box, pane);
 
-        // Replace the original TextField with the new StackPane
         grid.add(textFieldWithSymbol, GridPane.getColumnIndex(box), GridPane.getRowIndex(box));
     }
 
-    private void restartGame() {
-        loadPossibleWords();
-        initializeGame();
-        playAgainButton.setVisible(false); // Hide play again button after restart
+    private void showGameOver(String message) {
+        gameOverText.setText(message);
+        replayButton.setVisible(true);  // Show replay button after game over
     }
 
-    private void goToHomeScreen() {
-        screenManager.showScreen("HomeScreen"); // Assuming you have a method for showing the home screen
+    private void disableSubmissions() {
+        submitButton.setDisable(true);  // Disable the submit button after game over
+    }
+
+    private void goHome() {
+        screenManager.showScreen("HomeScreen");  // Switch to Home Screen
+    }
+
+    public void startNewGame() {
+        loadPossibleWords();
+        initializeGame();
+        gameOverText.setText("");  // Clear the game over text
+        replayButton.setVisible(false);  // Hide the replay button
+        submitButton.setDisable(false);  // Enable submit button for new game
     }
 
     public VBox getRoot() {
         return root;
     }
 }
+
