@@ -25,41 +25,33 @@ public class SettingsScreen {
         this.screenManager = screenManager;
         root = new VBox(20);
 
-        // Create ComboBox for color scheme
         colorSchemeCombo = new ComboBox<>();
         colorSchemeCombo.getItems().addAll("Default", "Dark", "Light"); // Use strings for color schemes
-        colorSchemeCombo.setValue("Default");  // Default selection
+        colorSchemeCombo.setValue("Default");  
 
-        // Create ComboBox for font scheme
         fontSchemeCombo = new ComboBox<>();
         fontSchemeCombo.getItems().addAll("Default", "Large", "Small");  // Use strings for font schemes
-        fontSchemeCombo.setValue("Default");  // Default selection
-        
+        fontSchemeCombo.setValue("Default");  
+
         colorSchemeCombo.setStyle("-fx-font-size: 14px; -fx-background-color: white; -fx-border-color: black;");
         fontSchemeCombo.setStyle("-fx-font-size: 14px; -fx-background-color: white; -fx-border-color: black;");
 
-        // Create Apply button to apply selected settings
         applyButton = new Button("Apply Settings");
         applyButton.setOnAction(e -> {
-            // Get selected color and font schemes as strings
             String selectedColorScheme = colorSchemeCombo.getValue();
             String selectedFontScheme = fontSchemeCombo.getValue();
 
-            // Convert selected strings to ColorScheme and FontScheme objects
             ColorScheme colorScheme = getColorScheme(selectedColorScheme);
             FontScheme fontScheme = getFontScheme(selectedFontScheme);
 
-            // Apply the settings via ScreenManager
             screenManager.applySettings(colorScheme, fontScheme);
 
-            // Optionally, navigate back to the home screen or another screen
             screenManager.showScreen("HomeScreen");
         });
 
         applyButton.setStyle("-fx-background-color: grey; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2px;");
         applyButton.setMinSize(120, 40);
 
-        // Add all components to root
         root.getChildren().addAll(colorSchemeCombo, fontSchemeCombo, applyButton);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(20));

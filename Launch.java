@@ -20,14 +20,11 @@ public class Launch extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Initialize ScreenManager
         screenManager = new ScreenManager(primaryStage);
 
-        // Set the initial scene
         screenManager.showScreen("HomeScreen");
 
-        // Set up the primary stage
-        primaryStage.setTitle("JavaFX Screen Switcher");
+        primaryStage.setTitle("Word Game");
         primaryStage.show();
     }
 }

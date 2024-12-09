@@ -38,7 +38,6 @@ public class ScreenManager {
         }
     }
 
-    // Method to show a screen based on the screen name
     public void showScreen(String screenName) {
         Scene scene = screens.get(screenName);
         if (scene == null) {
@@ -47,12 +46,9 @@ public class ScreenManager {
         stage.setScene(scene);
     }
 
-    // Apply settings for ColorScheme and FontScheme
     public void applySettings(ColorScheme colorScheme, FontScheme fontScheme) {
-        // Apply color scheme
         applyColorScheme(colorScheme);
 
-        // Apply font scheme
         applyFontScheme(fontScheme);
     }
 
